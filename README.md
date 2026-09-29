@@ -1,22 +1,37 @@
 # LaunchOps
 
+Google 로그인 사용자는 자신의 프로젝트, 실험, 검증 기준, 보도자료, 언론사 선택과 배포 결과를 Firebase Firestore에 저장합니다. 로그인하지 않은 사용자는 기존 브라우저 저장형 데모를 볼 수 있습니다. 두 데이터는 서로 섞이지 않습니다.
+
 ## 로컬 실행
 
-`.env.local`에 Firebase 웹 설정값이 들어 있습니다. 다음 명령으로 정적 파일을 생성하고 실행합니다.
+프로젝트 루트의 `.env.local`에 `.env.example`과 같은 이름으로 Firebase 웹 앱 설정을 입력합니다. Firebase 웹 앱 설정은 브라우저에 전달되는 공개 설정입니다. 서비스 계정 키나 광고 플랫폼 비밀 키를 이 파일에 넣지 마세요.
 
 ```powershell
-node scripts/build.mjs
-python -m http.server 8000 --directory dist
+node scripts/dev.mjs
 ```
 
-브라우저에서 `http://localhost:8000/login.html`을 엽니다. HTML 파일을 직접 열면 Firebase 로그인이 동작하지 않습니다.
+`http://localhost:8000/`을 엽니다. 서버를 중지할 때는 터미널에서 Ctrl+C를 누릅니다. HTML 원본을 더블클릭해 `file://`로 열면 Firebase 모듈이 동작하지 않습니다.
 
-## Vercel 환경변수
+## Firebase 설정
 
-Vercel 프로젝트의 **Settings → Environment Variables**에서 `.env.local`의 일곱 `FIREBASE_*` 항목을 같은 이름과 값으로 추가합니다. 필요한 배포 환경(Production, Preview, Development)을 선택한 뒤 다시 배포합니다. [Vercel 환경변수 설정](https://vercel.com/docs/environment-variables)
+Firebase Console에서 프로젝트 `test-e27db`의 Authentication > Sign-in method에 Google을 활성화하고, Authentication > Settings > Authorized domains에 사용할 도메인을 등록합니다. Cloud Firestore 데이터베이스를 생성합니다.
 
-`vercel.json`이 배포 시 `scripts/build.mjs`를 실행해 `dist/js/firebase-config.js`를 만듭니다. `.env.local`과 `dist/`는 Git에서 제외됩니다. Firebase 웹 설정은 브라우저에 전달되는 공개 설정값이므로 Google OAuth 클라이언트 시크릿은 이 파일에 넣지 않습니다.
+프로젝트 루트의 [firestore.rules](firestore.rules)는 로그인한 사용자에게 자신의 `users/{uid}` 아래 문서만 읽고 쓰도록 허용합니다. Firebase CLI로 다음을 한 번 배포해야 로그인 화면에서 저장할 수 있습니다. CLI에서 해당 프로젝트에 권한이 있는 Google 계정으로 로그인하세요.
 
-Firebase 프로젝트 `test-e27db`의 Google 로그인과 `localhost` 승인 도메인은 확인했습니다. 다른 배포 도메인은 Firebase Console의 **Authentication → Settings → Authorized domains**에 추가해야 합니다.
+```powershell
+npm install -g firebase-tools
+firebase login
+firebase deploy --only firestore:rules --project test-e27db
+```
 
-로그인 세션은 Firebase Authentication이 관리합니다. 프로젝트·실험·PR 데이터는 여전히 브라우저의 데모 데이터이며 기기 간 동기화되지 않습니다.
+이 저장소만 배포해서는 보안 규칙이 적용되지 않습니다. Firestore 화면에 `Missing or insufficient permissions`가 나타나면 위 규칙 배포와 로그인 계정의 프로젝트 권한을 확인하세요.
+
+## Vercel 설정
+
+Vercel 프로젝트의 Settings > Environment Variables에 `.env.example`의 `FIREBASE_*` 변수와 실제 값을 등록하고 해당 환경에 배포하세요. `vercel.json`이 `node scripts/build.mjs`를 실행하고 `dist`를 제공합니다. `.env.local`과 `dist`는 Git에서 제외됩니다.
+
+## 실제 기능과 외부 연동
+
+- 프로젝트 생성·수정·삭제, 가설·검증 기준 편집, 실험 계획과 실제 성과 수치 입력, 점수 계산, 보도자료 작성·저장·텍스트 다운로드, 언론사 검색·선택·수정, 발송 결과와 유입·가입 기록은 로그인 계정의 Firestore에 저장됩니다.
+- [js/outlets.js](js/outlets.js)에 공식 사이트가 있는 언론사 30곳을 분류했습니다. 제주 10곳, 전국 20곳입니다. 편집국 이메일은 확인되지 않은 주소를 임의로 넣지 않았습니다. 담당 주소를 확인해 저장하면 메일 앱의 작성 창을 열 수 있습니다.
+- Meta, YouTube, Reddit의 광고 계정 연결·집행·자동 성과 수집과 보도자료 자동 발송은 각 서비스의 계정 권한, OAuth/API 설정, 서버 측 비밀 키가 필요합니다. 연결 정보가 제공되면 서버 기능을 추가해야 합니다. 현재 화면은 이를 연결된 것으로 표시하거나 발송 성공으로 기록하지 않습니다.

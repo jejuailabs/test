@@ -37,7 +37,7 @@ for (const name of readdirSync(root).filter(name => name.endsWith('.html'))) {
   copyFileSync(join(root, name), join(output, name));
 }
 copyFileSync(join(root, 'css', 'style.css'), join(output, 'css', 'style.css'));
-for (const name of ['app.js', 'auth.js', 'mock-data.js', 'validation.js']) {
+for (const name of ['app.js', 'auth.js', 'boot.js', 'mock-data.js', 'validation.js', 'live-app.js', 'outlets.js']) {
   copyFileSync(join(root, 'js', name), join(output, 'js', name));
 }
 writeFileSync(join(output, 'js', 'firebase-config.js'),

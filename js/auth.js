@@ -19,4 +19,4 @@ window.LAUNCHOPS_AUTH = {
   signOut: () => signOut(auth)
 };
 
-await import('./app.js');
+await import(auth.currentUser ? './live-app.js' : './app.js');
