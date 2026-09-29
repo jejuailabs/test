@@ -162,10 +162,9 @@ dialog::backdrop{background:#142d2baa}
 .login-box{width:min(100%,390px)}
 .login-box h2{font-size:30px;margin:16px 0 8px}
 .login-box p{color:#7b8f93;font-size:14px;margin-bottom:28px}
+.auth-error{color:#b33636!important;background:#fff1f1;padding:10px 12px;border-radius:8px;margin:16px 0 0!important}
+.logout-button{border:0;background:none;color:#0f7666;font-weight:700;margin-left:14px;padding:7px;cursor:pointer}
 .google-g{display:grid;place-items:center;width:22px;height:22px;background:white;color:#4285f4;border-radius:50%;font-weight:800}
-.demo-note{background:#f2f7f5;padding:12px;border-radius:8px;color:#728988;font-size:12px;margin-top:15px;line-height:1.5}
-.legal{display:flex;gap:18px;color:#91a0a5;font-size:12px;margin-top:28px}
-.legal a{text-decoration:underline}
 @media(max-width:1000px){.sidebar{width:190px}
 .content{padding:30px 24px 70px}
 .metric-grid{grid-template-columns:repeat(4,1fr)}
@@ -197,4 +196,3 @@ h1{font-size:26px}
 .page-heading.spread{display:block}
 .page-heading.spread .button{margin-top:18px}
 }
-
