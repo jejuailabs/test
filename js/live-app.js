@@ -58,7 +58,8 @@ const formSubmit = (id, fn) => document.getElementById(id)?.addEventListener('su
   const submit = event.currentTarget.querySelector('[type="submit"]');
   if (submit) submit.disabled = true;
   try { await fn(new FormData(event.currentTarget)); }
-  catch (error) { alert(`저장하지 못했습니다: ${error.message}`); if (submit) submit.disabled = false; }
+  catch (error) { alert(`저장하지 못했습니다: ${error.message}`); }
+  finally { if (submit) submit.disabled = false; }
 });
 
 function shell(title, subtitle, content, step = '') {
@@ -129,7 +130,9 @@ function experimentForm() {
     if (form.get('end') < form.get('start')) throw Error('종료일은 시작일 이후여야 합니다.');
     const experiment = {id: crypto.randomUUID(), audience: String(form.get('audience')).trim(), channel: form.get('channel'), message: String(form.get('message')).trim(), budget: Number(form.get('budget')), attributionDays: Number(form.get('attributionDays')), start: form.get('start'), end: form.get('end'), status: 'planned', updatedAt: now(), metrics: emptyMetrics(), evidence: ''};
     project.experiments.unshift(experiment);
-    await saveProject(); location.href = `experiment-detail.html?project=${encodeURIComponent(project.id)}&experiment=${encodeURIComponent(experiment.id)}`;
+    try { await saveProject(); }
+    catch (error) { project.experiments = project.experiments.filter(item => item.id !== experiment.id); throw error; }
+    location.href = `experiment-detail.html?project=${encodeURIComponent(project.id)}&experiment=${encodeURIComponent(experiment.id)}`;
   });
 }
 
@@ -192,8 +195,15 @@ function prChannels() {
     const id = data.get('id') || crypto.randomUUID();
     const previous = channels.find(item => item.id === id);
     const updated = {...previous, id, name: String(data.get('name')).trim(), category: data.get('category'), topic: String(data.get('topic')).trim(), region: String(data.get('region')).trim(), url: String(data.get('url')).trim(), contact: String(data.get('contact')).trim(), lastContact: data.get('lastContact'), relation: String(data.get('relation')).trim(), type: '언론사', language: '한국어', selected: previous?.selected || false, excluded: previous?.excluded || false};
+    const before = previous && {...previous};
     if (previous) Object.assign(previous, updated); else channels.push(updated);
-    await saveChannels(); dialog.close(); draw();
+    try { await saveChannels(); }
+    catch (error) {
+      if (previous) Object.assign(previous, before);
+      else channels = channels.filter(channel => channel.id !== id);
+      throw error;
+    }
+    dialog.close(); draw();
   });
 }
 
