@@ -64,7 +64,7 @@ const formSubmit = (id, fn) => document.getElementById(id)?.addEventListener('su
 function shell(title, subtitle, content, step = '') {
   const nav = [['projects', '프로젝트'], ['dashboard', '대시보드'], ['new-experiment', '새 실험'], ['validation-result', '검증 결과'], ['pr-channels', 'PR 채널']];
   root.innerHTML = `<div class="app-shell"><aside class="sidebar"><a class="brand" href="projects.html"><span class="brand-mark">L</span><span>LaunchOps<small>Market validation</small></span></a><div class="sidebar-label">WORKSPACE</div><nav>${nav.map(([file, label]) => `<a href="${link(file)}" class="${page === file ? 'active' : ''}">${label}</a>`).join('')}</nav><div class="sidebar-foot">내 작업공간<strong>${esc(project?.name || '프로젝트 없음')}</strong><small>Firebase에 저장됩니다.</small></div></aside><div class="main-wrap"><header class="topbar"><span>LaunchOps <span class="slash">/</span> ${esc(project?.name || '프로젝트')}</span><span class="topbar-right">${esc(user.email)} <button class="logout-button" type="button" id="logout">로그아웃</button></span></header><main class="content">${step ? `<div class="eyebrow">${step}</div>` : ''}<div class="page-heading"><div><h1>${title}</h1><p>${subtitle}</p></div></div>${content}</main></div></div>`;
-  document.getElementById('logout').onclick = async () => { await window.LAUNCHOPS_AUTH.signOut(); location.replace('login.html'); };
+  document.getElementById('logout').onclick = async () => { await window.LAUNCHOPS_AUTH.signOut(); sessionStorage.removeItem('launchops-live'); location.replace('login.html'); };
 }
 
 function requireProject() {

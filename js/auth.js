@@ -19,4 +19,10 @@ window.LAUNCHOPS_AUTH = {
   signOut: () => signOut(auth)
 };
 
-await import(auth.currentUser ? './live-app.js' : './app.js');
+const page = document.body.dataset.page || 'login';
+if (page === 'login') sessionStorage.removeItem('launchops-live');
+if (page !== 'login' && auth.currentUser && sessionStorage.getItem('launchops-live') !== '1') {
+  location.replace(`login.html?next=${encodeURIComponent(location.pathname + location.search)}`);
+} else {
+  await import(page !== 'login' && auth.currentUser ? './live-app.js' : './app.js');
+}

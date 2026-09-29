@@ -1,7 +1,6 @@
 (async () => {
   const page=document.body.dataset.page||'login',root=document.getElementById('app');
   const signedIn=window.LAUNCHOPS_AUTH.user;
-  if(page==='login'&&signedIn){location.replace('projects.html');return}
   const M=window.LAUNCHOPS_MOCK, V=window.LaunchValidation, key=`launchops-v1-${signedIn?.uid||'guest'}`;
   let state;try{state=JSON.parse(localStorage.getItem(key))||structuredClone(M)}catch{state=structuredClone(M)}
   const save=()=>localStorage.setItem(key,JSON.stringify(state));
@@ -34,7 +33,22 @@
   function projectList(){root.innerHTML=`<div class="app-shell"><aside class="sidebar"><a class="brand" href="projects.html"><span class="brand-mark">L</span><span>LaunchOps<small>Market validation</small></span></a><div class="sidebar-label">WORKSPACE</div><nav><a class="active" href="projects.html">프로젝트</a><a href="new-project.html">새 프로젝트</a></nav><div class="sidebar-foot">MOCK WORKSPACE<small>데이터는 이 브라우저에 저장됩니다.</small></div></aside><div class="main-wrap"><header class="topbar">LaunchOps <span class="topbar-right">데모 모드 <a class="logout-button" href="login.html">로그인</a></span></header><main class="content"><div class="page-heading spread"><div><div class="eyebrow">YOUR PROJECTS</div><h1>프로젝트</h1><p>제품별 시장검증 상태를 한곳에서 확인하세요.</p></div>${a('새 프로젝트 만들기','new-project','primary')}</div><div class="project-grid">${state.projects.map(p=>{const r=V.evaluate(p);return `<a class="card project-card" href="dashboard.html?project=${encodeURIComponent(p.id)}"><div class="project-icon">${esc(p.name[0])}</div><div class="project-top">${badge(r.status)}<span>${esc(p.category)}</span></div><h2>${esc(p.name)}</h2><p>${esc(p.description)}</p><div class="project-bottom"><span>Validation Score <strong>${r.score}</strong></span><span>업데이트 ${esc(p.updatedAt||'—')}</span></div></a>`}).join('')}</div></main></div></div>`}
   if(page==='login'){
     root.innerHTML=`<div class="login-page"><div class="login-decor"><span class="brand light"><span class="brand-mark">L</span><span>LaunchOps<small>Market validation</small></span></span><div><div class="eyebrow">BUILD → VALIDATE → GROW</div><h1>만든 제품의<br>다음 결정을<br>데이터로.</h1><p>노출부터 결제까지 이어지는 시장 반응을 한눈에 확인하세요.</p></div><div class="login-foot">LaunchOps</div></div><div class="login-panel"><div class="login-box"><div class="eyebrow">WELCOME TO LAUNCHOPS</div><h2>로그인</h2><p>Google 계정으로 프로젝트에 접속하세요.</p><button class="button primary wide" type="button" id="google-login"><span class="google-g">G</span> Google로 계속하기</button><p id="auth-error" class="auth-error" role="alert" hidden></p><a class="button secondary wide" href="projects.html">로그인 없이 데모 보기</a></div></div></div>`;
-    document.getElementById('google-login').addEventListener('click',async event=>{const button=event.currentTarget,error=document.getElementById('auth-error');button.disabled=true;error.hidden=true;try{await window.LAUNCHOPS_AUTH.signIn();const next=qs.get('next');location.replace(/^\/[a-z-]+\.html(?:\?[a-zA-Z0-9=&_%.-]*)?$/.test(next||'')?next:'projects.html')}catch(failure){const messages={'auth/popup-closed-by-user':'Google 로그인 창이 닫혔습니다.','auth/popup-blocked':'팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.','auth/unauthorized-domain':'현재 도메인이 Firebase Authentication의 승인된 도메인에 없습니다.','auth/operation-not-allowed':'Firebase Authentication에서 Google 로그인을 활성화해 주세요.','auth/network-request-failed':'네트워크 연결을 확인해 주세요.','auth/account-exists-with-different-credential':'같은 이메일의 다른 로그인 방식 계정이 있습니다.'};error.textContent=messages[failure.code]||'Google 로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.';error.hidden=false;button.disabled=false}});
+    if(signedIn){
+      const button=document.getElementById('google-login');
+      const status=document.createElement('p');
+      status.className='notice';
+      status.textContent=`${signedIn.email} 계정의 로그인 상태가 유지되고 있습니다.`;
+      button.before(status);
+      button.textContent='이 계정으로 계속하기';
+      const demo=root.querySelector('.login-box a[href="projects.html"]');
+      demo.textContent='로그아웃하고 데모 보기';
+      demo.addEventListener('click',async event=>{
+        event.preventDefault();
+        try{await window.LAUNCHOPS_AUTH.signOut();sessionStorage.removeItem('launchops-live');location.href='projects.html'}
+        catch(error){const message=document.getElementById('auth-error');message.textContent=`로그아웃하지 못했습니다: ${error.message}`;message.hidden=false}
+      });
+    }
+    document.getElementById('google-login').addEventListener('click',async event=>{const button=event.currentTarget,error=document.getElementById('auth-error');button.disabled=true;error.hidden=true;try{if(!signedIn)await window.LAUNCHOPS_AUTH.signIn();sessionStorage.setItem('launchops-live','1');const next=qs.get('next');location.replace(/^\/[a-z-]+\.html(?:\?[a-zA-Z0-9=&_%.-]*)?$/.test(next||'')?next:'projects.html')}catch(failure){const messages={'auth/popup-closed-by-user':'Google 로그인 창이 닫혔습니다.','auth/popup-blocked':'팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.','auth/unauthorized-domain':'현재 도메인이 Firebase Authentication의 승인된 도메인에 없습니다.','auth/operation-not-allowed':'Firebase Authentication에서 Google 로그인을 활성화해 주세요.','auth/network-request-failed':'네트워크 연결을 확인해 주세요.','auth/account-exists-with-different-credential':'같은 이메일의 다른 로그인 방식 계정이 있습니다.'};error.textContent=messages[failure.code]||'Google 로그인에 실패했습니다. 잠시 후 다시 시도해 주세요.';error.hidden=false;button.disabled=false}});
   }else if(page==='projects'){projectList()}
   else if(page==='new-project'){
     shell('새 제품 등록','검증할 제품의 기본 정보를 입력하세요.',`<div class="narrow">${card(`<form id="project-form" class="form-stack">${field('제품명','name','','text','required')}${field('제품 URL','url','','url','required placeholder="https://"')}<div class="form-grid">${field('카테고리','category','','text','required placeholder="예: Micro SaaS"')}${field('목표 시장','targetMarket','','text','required placeholder="예: 1인 창업자"')}</div>${area('제품 설명','description','',5)}${actions([a('목록으로','projects'),'<button class="button primary" type="submit">제품 분석 및 가설 생성</button>'])}</form>`)}</div>`,'01 / 제품 등록');
