@@ -1,3 +1,4 @@
 .env.local
+*firebase-adminsdk*.json
 .vercel/
 dist/

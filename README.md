@@ -18,6 +18,8 @@ Firebase Console에서 프로젝트 `test-e27db`의 Authentication > Sign-in met
 
 프로젝트 루트의 [firestore.rules](firestore.rules)는 로그인한 사용자에게 자신의 `users/{uid}` 아래 문서만 읽고 쓰도록 허용합니다. Firebase CLI로 다음을 한 번 배포해야 로그인 화면에서 저장할 수 있습니다. CLI에서 해당 프로젝트에 권한이 있는 Google 계정으로 로그인하세요.
 
+`test-e27db`의 기본 Firestore 데이터베이스에는 2026-09-29에 이 규칙을 게시하고, 게시된 소스가 저장소 파일과 일치하는 것을 확인했습니다. 이후 규칙을 수정하면 다시 배포해야 합니다.
+
 ```powershell
 npm install -g firebase-tools
 firebase login
