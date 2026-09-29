@@ -34,7 +34,7 @@ try {
   const savedById = new Map(saved.map(channel => [channel.id, channel]));
   channels = [...OUTLETS.map(channel => ({...channel, ...savedById.get(channel.id)})), ...saved.filter(channel => !OUTLETS.some(item => item.id === channel.id))];
 } catch (error) {
-  root.innerHTML = `<main class="content narrow">${card(`<h1>작업공간을 불러오지 못했습니다</h1><p>Firestore 데이터베이스와 사용자별 보안 규칙을 확인해 주세요.</p><p class="muted">${esc(error.code || error.message)}</p><a class="button" href="login.html">로그인 화면</a>`)}</main>`;
+  root.innerHTML = `<main class="content narrow">${card(`<h1>작업공간을 불러오지 못했습니다</h1><p>${error.code === 'permission-denied' ? '로그인은 완료됐지만 Firestore에서 계정 데이터 읽기를 거부했습니다. Firebase 프로젝트의 Firestore 보안 규칙을 배포해 주세요.' : 'Firestore 데이터베이스와 사용자별 보안 규칙을 확인해 주세요.'}</p><p class="muted">${esc(error.code || error.message)}</p><a class="button" href="login.html">로그인 화면</a>`)}</main>`;
   throw error;
 }
 

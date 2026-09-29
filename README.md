@@ -24,7 +24,7 @@ firebase login
 firebase deploy --only firestore:rules --project test-e27db
 ```
 
-이 저장소만 배포해서는 보안 규칙이 적용되지 않습니다. Firestore 화면에 `Missing or insufficient permissions`가 나타나면 위 규칙 배포와 로그인 계정의 프로젝트 권한을 확인하세요.
+이 저장소를 Vercel에 배포하는 것만으로는 Firestore 보안 규칙이 적용되지 않습니다. Vercel 화면에서 `Missing or insufficient permissions`가 나타나면 Firebase Console의 `test-e27db` 프로젝트에서 **Firestore Database > Rules**를 열어 현재 게시된 규칙을 확인하세요. 필요하면 [firestore.rules](firestore.rules)의 `users/{userId}` 규칙을 기존 규칙과 병합해 **Publish**를 누르세요. 기존에 다른 컬렉션을 사용하는 규칙이 있다면 전체 파일로 덮어쓰지 마세요. 규칙 게시 후 새 요청에 적용되는 데 약 1분이 걸릴 수 있습니다.
 
 ## Vercel 설정
 

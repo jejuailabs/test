@@ -7,6 +7,11 @@ if (location.protocol === 'file:') {
   localHelp();
 } else {
   import(new URL('./auth.js', document.currentScript.src).href).catch(error => {
+    // Feature modules may already have shown a more specific error.
+    if (app.textContent.trim()) {
+      console.error(error);
+      return;
+    }
     app.innerHTML = '<main class="content narrow"><section class="card"><h1>앱을 불러오지 못했습니다</h1><p>.env.local 설정과 브라우저 콘솔을 확인해 주세요.</p><p id="boot-error" class="muted"></p></section></main>';
     document.getElementById('boot-error').textContent = error.message;
     console.error(error);
